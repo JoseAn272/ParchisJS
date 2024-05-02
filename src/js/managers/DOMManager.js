@@ -189,7 +189,7 @@ export default class DOMManager{
 
            if (this._gameManager._finish_check(player)) {
 
-                alert(`El jugador ${player.whatColorColor.toUpperCase()} ha terminado, por favor presione al cubilete para pasar el turno.`);
+                alert(`El jugador ${player.whatColor.toUpperCase()} ha terminado, por favor presione al cubilete para pasar el turno.`);
 
                 this._createVideo();
 
@@ -238,6 +238,69 @@ export default class DOMManager{
         dado1.style.fontSize = this._STRINGS.ST_SIZE40;
     }
 
+    _checkIfGetOutHome(pos, player, tokenImg){
+        if(pos == this._NUMBERS.DOM_GET_OUT_HOME){
+
+            if(player.yourPieces[tokenImg.id].isMovementAllowed(document.querySelector(`.c${player.givePositionInit}`).childElementCount )){
+
+                document.querySelector(`.c${player.givePositionInit}`).appendChild(tokenImg);
+
+            }else{
+
+                player.yourPieces[tokenImg.id].whatPosition = this._NUMBERS.DOM_ZERO;
+                player.yourPieces[tokenImg.id].isOutHome = false;
+                
+            }
+            return true;
+        }
+    }
+
+    _checkNextPositionAndMovement(player, tokenImg, checkTokens){
+        let j = player.yourPieces[tokenImg.id].whatPosition + this._NUMBERS.DOM_ONE;
+
+        if (j > this._NUMBERS.DOM_LAST_BOX) {
+            j -= this._NUMBERS.DOM_LAST_BOX;
+        }
+
+        //Casilla a la que llega
+        let x = document.querySelector(`.c${j}`).childElementCount;
+
+        if(!player.yourPieces[tokenImg.id].isMovementAllowed(x)){
+
+            return checkTokens = false;
+
+        }
+        return checkTokens = true;
+    }
+
+    _checkIfResetTokenOrMoveAndCheckEat(checkTokens, player, tokenImg, posOrigin){
+        if(!checkTokens){
+
+            console.log("reseteo de ficha");
+
+            player.yourPieces[tokenImg.id].isInEnd = false;
+            player.yourPieces[tokenImg.id].whatPosition = posOrigin;
+
+            document.querySelector(`.c${posOrigin}`).appendChild(tokenImg);
+
+        } else {
+            let eat = false;
+
+            if (document.querySelector(`.c${player.yourPieces[tokenImg.id].whatPosition}`).childElementCount == this._NUMBERS.DOM_TWO) {
+
+                let casilla = document.querySelector(`.c${player.yourPieces[tokenImg.id].whatPosition}`);
+                eat = this._eatToken(casilla,tokenImg);
+
+            } 
+
+            if (!eat) {
+
+                this._changeStyleTokens();
+
+            }
+        }
+    }
+
     _eventToken(tokenImg,player){
 
         tokenImg.addEventListener('click', () => {
@@ -261,64 +324,17 @@ export default class DOMManager{
                     break;
                 }
 
-                let j = player.yourPieces[tokenImg.id].whatPosition + this._NUMBERS.DOM_ONE;
-
-                if (j > this._NUMBERS.DOM_LAST_BOX) {
-                    j -= this._NUMBERS.DOM_LAST_BOX;
-                }
-
-                //Casilla a la que llega
-                let x = document.querySelector(`.c${j}`).childElementCount;
-
-                if(!player.yourPieces[tokenImg.id].isMovementAllowed(x)){
-
-                    checkTokens = false;
-
-                }
+                this._checkNextPositionAndMovement();
 
                 pos = this._gameManager.move_token(player, tokenImg.id);
 
-                if(pos == this._NUMBERS.DOM_GET_OUT_HOME){
+                if(this._checkIfGetOutHome(pos, player, tokenImg)) break;
 
-                    if(player.yourPieces[tokenImg.id].isMovementAllowed(document.querySelector(`.c${player.givePositionInit}`).childElementCount )){
-
-                        document.querySelector(`.c${player.givePositionInit}`).appendChild(tokenImg);
-
-                    }else{
-
-                        player.yourPieces[tokenImg.id].whatPosition = this._NUMBERS.DOM_ZERO;
-                        player.yourPieces[tokenImg.id].isOutHome = false;
-                        
-                    }
-                    break;
-                }
                 document.querySelector(`.c${pos}`).appendChild(tokenImg);
 
             }
             
-            if(!checkTokens){
-
-                console.log("reseteo de ficha");
-
-                player.yourPieces[tokenImg.id].isInEnd = false;
-                player.yourPieces[tokenImg.id].whatPosition = posOrigin;
-
-                document.querySelector(`.c${posOrigin}`).appendChild(tokenImg);
-
-            } else {
-                let eat = false;
-
-                if (document.querySelector(`.c${player.yourPieces[tokenImg.id].whatPosition}`).childElementCount == this._NUMBERS.DOM_TWO) {
-
-                    let casilla = document.querySelector(`.c${player.yourPieces[tokenImg.id].whatPosition}`);
-                    eat = this._eatToken(casilla,tokenImg);
-
-                }
-
-                if (!eat) {
-                    this._changeStyleTokens();
-                }
-            }
+            this._checkIfResetTokenOrMoveAndCheckEat(checkTokens, player, tokenImg, posOrigin);
           
         });
 
@@ -327,20 +343,23 @@ export default class DOMManager{
     }
 
     _moveTokenLastBoxesAllowed(player, tokenImg, cont){
+
         player.yourPieces[tokenImg.id].whatPosition = player.yourPieces[tokenImg.id].whatPosition + cont;
     
-            if (player.yourPieces[tokenImg.id].whatPosition >= this._NUMBERS.DOM_LIMIT_END + this._NUMBERS.DOM_ONE  && player.yourPieces[tokenImg.id].isInEnd) {
+        if (player.yourPieces[tokenImg.id].whatPosition >= this._NUMBERS.DOM_LIMIT_END + this._NUMBERS.DOM_ONE  && player.yourPieces[tokenImg.id].isInEnd) {
 
-                let div = document.querySelector(`.${this._STRINGS.ST_DICE_FINISHED}${player.getColor}`).appendChild(tokenImg);
+            let div = document.querySelector(`.${this._STRINGS.ST_DICE_FINISHED}${player.getColor}`).appendChild(tokenImg);
 
-                div.style.pointerEvents = this._STRINGS.ST_NONE;
-                div.removeAttribute(this._STRINGS.ST_NAME);
+            div.style.pointerEvents = this._STRINGS.ST_NONE;
+            div.removeAttribute(this._STRINGS.ST_NAME);
 
-                player.yourPieces[tokenImg.id].isFinish = true;
+            player.yourPieces[tokenImg.id].isFinish = true;
 
-            } else {
-                document.querySelector(`.${player.whatColor}${player.yourPieces[tokenImg.id].whatPosition}`).appendChild(tokenImg);
-            }
+        } else {
+
+            document.querySelector(`.${player.whatColor}${player.yourPieces[tokenImg.id].whatPosition}`).appendChild(tokenImg);
+
+        }
     }
 
     _goOverLastBoxes(cont, checkTokens, player, tokenImg, throu, value){
@@ -367,9 +386,11 @@ export default class DOMManager{
             if(!player.yourPieces[tokenImg.id].isMovementAllowed(x)){
                 checkTokens = false;
             }
+
             cont++;
 
         }
+
         return [cont, checkTokens]
     }
 
@@ -703,7 +724,7 @@ export default class DOMManager{
 
                 let change = document.querySelector(`.podiumPlayer${i}`);
 
-                change.textContent = this._gameManager.pFinish[i].getColor.toUpperCase();
+                change.textContent = this._gameManager.pFinish[i].whatColor.toUpperCase();
 
             }
         }

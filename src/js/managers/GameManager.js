@@ -217,7 +217,7 @@ export default class Events{
 
         for (let t = this._NUMBERS.GM_ZERO; t < player.howMuchPieces; t++) {
 
-            if (this.getToken.isFinish) {
+            if (this.getToken(t).isFinish) {
                 tfin++;
             }
         }
