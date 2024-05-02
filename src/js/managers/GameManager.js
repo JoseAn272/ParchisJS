@@ -114,17 +114,17 @@ export default class Events{
         return (dice == this._NUMBERS.GM_DICEOUTHOME || sum == this._NUMBERS.GM_DICEOUTHOME) && !(this.getToken(token).isOutHome);
     }
 
-    setExitCase(token_id,pos,bol){
+    setExitCase(token_id,pos){
         let token = this.getToken(token_id);
 
         this.setPosToken(token_id,pos);
-        token.isOutHome = bol;
+        token.isOutHome = true;
     }
 
     checkIfOutHomeOrMove(posinit, sum, token, index, d){
         if (this.canExitHomeNotOutHome(d,sum,token)) {
 
-            this.setExitCase(token,posinit,true);
+            this.setExitCase(token,posinit);
 
             return this._NUMBERS.GM_GETOUTHOME;
 
@@ -217,14 +217,14 @@ export default class Events{
 
         for (let t = this._NUMBERS.GM_ZERO; t < player.howMuchPieces; t++) {
 
-            if (this.getToken.getFinish) {
+            if (this.getToken.isFinish) {
                 tfin++;
             }
         }
 
         if (tfin == player.howMuchPieces) {
 
-            player.setEnd = true;
+            player.hasEnd = true;
             return true;
         }
 
@@ -233,7 +233,7 @@ export default class Events{
 
     _finish_check(player){
 
-        if (this._allTokensEnd(player) && player.getEnd) {
+        if (this._allTokensEnd(player) && player.hasEnd) {
             return true;
         }
 

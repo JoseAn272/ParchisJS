@@ -326,26 +326,31 @@ export default class DOMManager{
         
     }
 
-    _checkBoxLast(value, throu, player, tokenImg){
+    _moveTokenLastBoxesAllowed(player, tokenImg, cont){
+        player.yourPieces[tokenImg.id].whatPosition = player.yourPieces[tokenImg.id].whatPosition + cont;
+    
+            if (player.yourPieces[tokenImg.id].whatPosition >= this._NUMBERS.DOM_LIMIT_END + this._NUMBERS.DOM_ONE  && player.yourPieces[tokenImg.id].isInEnd) {
 
-        let cont = this._NUMBERS.DOM_ZERO;
-        let checkTokens = true;
+                let div = document.querySelector(`.${this._STRINGS.ST_DICE_FINISHED}${player.getColor}`).appendChild(tokenImg);
 
-        if(value <= throu && player.yourPieces[tokenImg.id].getInEnd == false){
+                div.style.pointerEvents = this._STRINGS.ST_NONE;
+                div.removeAttribute(this._STRINGS.ST_NAME);
 
-            player.yourPieces[tokenImg.id].isInEnd = true;
-            player.yourPieces[tokenImg.id].whatPosition = this._NUMBERS.DOM_ZERO;
+                player.yourPieces[tokenImg.id].isFinish = true;
 
-        }
-        
+            } else {
+                document.querySelector(`.${player.whatColor}${player.yourPieces[tokenImg.id].whatPosition}`).appendChild(tokenImg);
+            }
+    }
 
+    _goOverLastBoxes(cont, checkTokens, player, tokenImg, throu, value){
         for (let i = value ;  i <= throu ;i++) {
 
             let j = player.yourPieces[tokenImg.id].whatPosition + this._NUMBERS.DOM_ONE;
 
-            if (j > this._NUMBERS.DOM_LIMIT_END && player.yourPieces[tokenImg.id].getInEnd) {
+            if (j > this._NUMBERS.DOM_LIMIT_END && player.yourPieces[tokenImg.id].isInEnd) {
 
-                let div = document.querySelector(`.diceFinish${player.getColor}`).appendChild(tokenImg);
+                let div = document.querySelector(`.diceFinish${player.whatColor}`).appendChild(tokenImg);
                 player.yourPieces[tokenImg.id].isFinish = true;
 
                 div.style.pointerEvents = this._STRINGS.ST_NONE;
@@ -362,29 +367,35 @@ export default class DOMManager{
             if(!player.yourPieces[tokenImg.id].isMovementAllowed(x)){
                 checkTokens = false;
             }
-
             cont++;
+
+        }
+        return [cont, checkTokens]
+    }
+
+    _checkBoxLast(value, throu, player, tokenImg){
+
+        let cont = this._NUMBERS.DOM_ZERO;
+        let checkTokens = true;
+
+        if(value <= throu && player.yourPieces[tokenImg.id].isInEnd == false){
+
+            player.yourPieces[tokenImg.id].isInEnd = true;
+            player.yourPieces[tokenImg.id].whatPosition = this._NUMBERS.DOM_ZERO;
+
         }
         
+        let array = this._goOverLastBoxes(cont, checkTokens, player, tokenImg, throu, value);
+
+        console.log(array);
+        cont = array[0]
+        checkTokens = array[1]
+        console.log(cont);
         
         if(checkTokens==true){
 
-            player.yourPieces[tokenImg.id].whatPosition = player.yourPieces[tokenImg.id].whatPosition + cont;
+            this._moveTokenLastBoxesAllowed(player, tokenImg, cont)
     
-            if (player.yourPieces[tokenImg.id].whatPosition >= this._NUMBERS.DOM_LIMIT_END + this._NUMBERS.DOM_ONE  && player.yourPieces[tokenImg.id].isInEnd) {
-
-                let div = document.querySelector(`.${this._STRINGS.ST_DICE_FINISHED}${player.getColor}`).appendChild(tokenImg);
-
-                div.style.pointerEvents = this._STRINGS.ST_NONE;
-                div.removeAttribute(this._STRINGS.ST_NAME);
-
-                player.yourPieces[tokenImg.id].isFinish = true;
-
-            } else {
-                document.querySelector(`.${player.whatColor}${player.yourPieces[tokenImg.id].whatPosition}`).appendChild(tokenImg);
-            }
-    
-           
         } 
     }
 
@@ -414,7 +425,7 @@ export default class DOMManager{
         if (this._saves.includes(casilla.className)) {
             return false;
         }
-        sdf
+        
         if (casilla.firstElementChild.name != tokenImg.name) {
 
             let tokenEnemy = casilla.firstElementChild;
