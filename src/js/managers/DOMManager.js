@@ -406,7 +406,7 @@ export default class DOMManager{
                 document.querySelector(`.${this._COLORS.DICE_BLUE}`).appendChild(tokenEnemy);
                 return player = this._gameManager.getPlayerSelected(this._STRINGS.ST_BLUE);
         }
-        
+
     }
 
     _eatToken(casilla,tokenImg){
@@ -414,7 +414,7 @@ export default class DOMManager{
         if (this._saves.includes(casilla.className)) {
             return false;
         }
-        
+        sdf
         if (casilla.firstElementChild.name != tokenImg.name) {
 
             let tokenEnemy = casilla.firstElementChild;
