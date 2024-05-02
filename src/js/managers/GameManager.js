@@ -151,7 +151,11 @@ export default class Events{
 
         for (let d = this._NUMBERS.GM_ZERO; d < nums.length; d++) {
 
-            return this.checkIfOutHomeOrMove(posinit, sum, token_id, index, nums[d]);
+            let pos =  this.checkIfOutHomeOrMove(posinit, sum, token_id, index, nums[d]);
+
+            if(pos != undefined){
+                return pos;
+            }
 
         }        
 

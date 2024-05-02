@@ -105,7 +105,7 @@ export default class DOMManager{
 
         this._podium = 0;
 
-        this._saves = ['casillas c12','casillas c17','casillas c29','casillas c34','casillas c46','casillas c51','casillas c63','casillas c65'];
+        this._saves = ['casillas c12','casillas c17','casillas c29','casillas c34','casillas c46','casillas c51','casillas c63','casillas c68'];
 
         this._divC = document.querySelector(`.${this._CLASSES.UX_CONTENT}`);
 
@@ -296,7 +296,7 @@ export default class DOMManager{
 
             }
             
-            if(checkTokens == false){
+            if(!checkTokens){
 
                 console.log("reseteo de ficha");
 
@@ -369,8 +369,6 @@ export default class DOMManager{
         
         if(checkTokens==true){
 
-            //token.increasePosition(count);
-
             player.yourPieces[tokenImg.id].whatPosition = player.yourPieces[tokenImg.id].whatPosition + cont;
     
             if (player.yourPieces[tokenImg.id].whatPosition >= this._NUMBERS.DOM_LIMIT_END + this._NUMBERS.DOM_ONE  && player.yourPieces[tokenImg.id].isInEnd) {
@@ -390,6 +388,27 @@ export default class DOMManager{
         } 
     }
 
+    _switchColorToken(colorToken){
+
+        let player;
+
+        switch (colorToken) {
+            case this._COLORS.DICE_RED:
+                document.querySelector(`.${this._COLORS.DICE_RED}`).appendChild(tokenEnemy);
+                return player = this._gameManager.getPlayerSelected(this._STRINGS.ST_RED);
+            case this._COLORS.DICE_YELLOW:
+                document.querySelector(`.${this._COLORS.DICE_YELLOW}`).appendChild(tokenEnemy);
+                return player = this._gameManager.getPlayerSelected(this._STRINGS.ST_YELLOW);
+            case this._COLORS.DICE_GREEN:
+                document.querySelector(`.${this._COLORS.DICE_GREEN}`).appendChild(tokenEnemy);
+                return player = this._gameManager.getPlayerSelected(this._STRINGS.ST_GREEN);
+            case this._COLORS.DICE_BLUE:
+                document.querySelector(`.${this._COLORS.DICE_BLUE}`).appendChild(tokenEnemy);
+                return player = this._gameManager.getPlayerSelected(this._STRINGS.ST_BLUE);
+        }
+        
+    }
+
     _eatToken(casilla,tokenImg){
 
         if (this._saves.includes(casilla.className)) {
@@ -398,33 +417,10 @@ export default class DOMManager{
         
         if (casilla.firstElementChild.name != tokenImg.name) {
 
-            let player;
-
             let tokenEnemy = casilla.firstElementChild;
             let colorToken = tokenEnemy.name;
-
-            switch (colorToken) {
-                case this._COLORS.DICE_RED:
-                    document.querySelector(`.${this._COLORS.DICE_RED}`).appendChild(tokenEnemy);
-                    player = this._gameManager.getPlayerSelected(this._STRINGS.ST_RED);
-                    break;
-                case this._COLORS.DICE_YELLOW:
-                    document.querySelector(`.${this._COLORS.DICE_YELLOW}`).appendChild(tokenEnemy);
-                    player = this._gameManager.getPlayerSelected(this._STRINGS.ST_YELLOW);
-                    break;
-                case this._COLORS.DICE_GREEN:
-                    document.querySelector(`.${this._COLORS.DICE_GREEN}`).appendChild(tokenEnemy);
-                    player = this._gameManager.getPlayerSelected(this._STRINGS.ST_GREEN);
-                    break;
-                case this._COLORS.DICE_BLUE:
-                    document.querySelector(`.${this._COLORS.DICE_BLUE}`).appendChild(tokenEnemy);
-                    player = this._gameManager.getPlayerSelected(this._STRINGS.ST_BLUE);
-                    break;
-                default:
-                    break;
-            }
             
-            this._gameManager.setPosToken(tokenEnemy.id,this._gameManager.backHome(player));
+            this._gameManager.setPosToken(tokenEnemy.id,this._gameManager.backHome(this._switchColorToken(colorToken)));
             this._gameManager.getToken(tokenEnemy.id).isOutHome = false;
 
             let res = this._gameManager.returnTrhows();
@@ -525,6 +521,21 @@ export default class DOMManager{
         return players[0].howMuchPieces;
     }
 
+    _checkIfsCreateToken(i, j, tokenImg, players){
+        if(this.thereAreTwoPlayers(i)){
+            i = this._NUMBERS.DOM_TWO;
+            this._eventToken(tokenImg,players[this._NUMBERS.DOM_ONE]);
+        }else{
+            this._eventToken(tokenImg,players[i]);
+        }
+
+        this._setAttributesTokenImg(tokenImg,j,i);
+
+        if (i == this._NUMBERS.DOM_ZERO) {
+            tokenImg.style.pointerEvents = this._STRINGS.ST_ALL;
+        }
+    }
+
     _createToken(){
 
         let players = this._gameManager._configC.givePlayers;
@@ -535,18 +546,7 @@ export default class DOMManager{
 
                 let tokenImg = document.createElement('img');
 
-                if(this.thereAreTwoPlayers(i)){
-                    i = this._NUMBERS.DOM_TWO;
-                    this._eventToken(tokenImg,players[this._NUMBERS.DOM_ONE]);
-                }else{
-                    this._eventToken(tokenImg,players[i]);
-                }
-
-                this._setAttributesTokenImg(tokenImg,j,i);
-
-                if (i == this._NUMBERS.DOM_ZERO) {
-                    tokenImg.style.pointerEvents = this._STRINGS.ST_ALL;
-                }
+                this._checkIfsCreateToken(i, j, tokenImg, players)
 
                 let divHome = document.querySelector(`.${this._valuesColors[i]}`);
 
@@ -639,15 +639,7 @@ export default class DOMManager{
         btnR.title = 'Botón de retorno';
     }
 
-    _createPodium(){
-
-        let divP = document.createElement('div');
-        divP.className = this._CLASSES.UX_PODIUM;
-
-        let p = document.createElement('p');
-        p.textContent = 'Marcador';
-
-        divP.appendChild(p);
+    _createPodiumImages(divP){
 
         for(let j = this._NUMBERS.DOM_ZERO; j < this._NUMBERS.DOM_NUM_PLAYERS - this._NUMBERS.DOM_ONE; j++){
 
@@ -658,6 +650,20 @@ export default class DOMManager{
             divP.appendChild(podiumPlayer);
             divP.appendChild(this._createSpan(j));
         }
+
+    }
+
+    _createPodium(){
+
+        let divP = document.createElement('div');
+        divP.className = this._CLASSES.UX_PODIUM;
+
+        let p = document.createElement('p');
+        p.textContent = 'Marcador';
+
+        divP.appendChild(p);
+
+        this._createPodiumImages(divP)
 
         this._divS.appendChild(divP);
     }
