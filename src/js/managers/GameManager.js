@@ -234,6 +234,9 @@ export default class Events{
     _finish_check(player){
 
         if (this._allTokensEnd(player) && player.hasEnd) {
+            if (!(this.pFinish.includes(player))) {
+                this.addPFinish(player);
+            }
             return true;
         }
 
@@ -242,19 +245,16 @@ export default class Events{
 
     isFinished(){
         let finish = this._NUMBERS.GM_ZERO;
-        let ps = [];
 
         for (let p = this._NUMBERS.GM_ZERO; p < this._CHANGEABLES.GM_COUNTPLAYERS; p++) {
 
             if (this._finish_check(this._CHANGEABLES.GM_PLAYERS[p])) {
 
                 finish++;
-                ps.push(this._CHANGEABLES.GM_PLAYERS[p]);
 
             }
 
         }
-        this.pFinish = ps;
 
         if (finish == this._CHANGEABLES.GM_COUNTPLAYERS - this._NUMBERS.GM_ONE) {
 

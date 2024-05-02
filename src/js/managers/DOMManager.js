@@ -35,8 +35,8 @@ export default class DOMManager{
             UX_GAME:                'ux-game',
             UX_PODIUM:              'ux-podium',
             UX_CUBE:                'ux-cube',
-            UX_CUBE0:                'ux-cube0',
-            UX_CUBE1:                'ux-cube1',
+            UX_CUBE0:               'ux-cube0',
+            UX_CUBE1:               'ux-cube1',
             UX_CUBESDICES:          'ux-cubesdices',
             UX_VIDEO:               'ux-video'
         }
@@ -188,19 +188,12 @@ export default class DOMManager{
            let player = this._gameManager.getTurnPlayer();
 
            if (this._gameManager._finish_check(player)) {
-
+                
                 alert(`El jugador ${player.whatColor.toUpperCase()} ha terminado, por favor presione al cubilete para pasar el turno.`);
 
-                this._createVideo();
-
                 this._setAttributesDadosFinishPlayer();
-                
-            }else{
-                let video = document.querySelector(`.${this._CLASSES.UX_VIDEO}`);
 
-                if (video != null) {
-                    video.remove();
-                }
+                this._createVideo();
                 
             }
 
@@ -221,7 +214,8 @@ export default class DOMManager{
 
     _addVideo(video){
         let div = document.querySelector(`.${this._valuesColors[this._gameManager._turn]}`);
-        div.className = this._valuesColors[this._gameManager._turn] + this._STRINGS.ST_TWO;
+
+        div.className = this._valuesColors[this._gameManager._turn] + '2';
 
         div.appendChild(video);
     }
@@ -342,24 +336,22 @@ export default class DOMManager{
         
     }
 
-    _moveTokenLastBoxesAllowed(player, tokenImg, cont){
 
+    _moveTokenLastBoxesAllowed(player, tokenImg, cont){
         player.yourPieces[tokenImg.id].whatPosition = player.yourPieces[tokenImg.id].whatPosition + cont;
     
-        if (player.yourPieces[tokenImg.id].whatPosition >= this._NUMBERS.DOM_LIMIT_END + this._NUMBERS.DOM_ONE  && player.yourPieces[tokenImg.id].isInEnd) {
+            if (player.yourPieces[tokenImg.id].whatPosition >= this._NUMBERS.DOM_LIMIT_END + this._NUMBERS.DOM_ONE  && player.yourPieces[tokenImg.id].isInEnd) {
 
-            let div = document.querySelector(`.${this._STRINGS.ST_DICE_FINISHED}${player.getColor}`).appendChild(tokenImg);
+                let div = document.querySelector(`.${this._STRINGS.ST_DICE_FINISHED}${player.whatColor}`).appendChild(tokenImg);
 
-            div.style.pointerEvents = this._STRINGS.ST_NONE;
-            div.removeAttribute(this._STRINGS.ST_NAME);
+                div.style.pointerEvents = this._STRINGS.ST_NONE;
+                div.removeAttribute(this._STRINGS.ST_NAME);
 
-            player.yourPieces[tokenImg.id].isFinish = true;
+                player.yourPieces[tokenImg.id].isFinish = true;
 
-        } else {
-
-            document.querySelector(`.${player.whatColor}${player.yourPieces[tokenImg.id].whatPosition}`).appendChild(tokenImg);
-
-        }
+            } else {
+                document.querySelector(`.${player.whatColor}${player.yourPieces[tokenImg.id].whatPosition}`).appendChild(tokenImg);
+            }
     }
 
     _goOverLastBoxes(cont, checkTokens, player, tokenImg, throu, value){
@@ -369,7 +361,7 @@ export default class DOMManager{
 
             if (j > this._NUMBERS.DOM_LIMIT_END && player.yourPieces[tokenImg.id].isInEnd) {
 
-                let div = document.querySelector(`.diceFinish${player.whatColor}`).appendChild(tokenImg);
+                let div = document.querySelector(`.${this._STRINGS.ST_DICE_FINISHED}${player.whatColor}`).appendChild(tokenImg);
                 player.yourPieces[tokenImg.id].isFinish = true;
 
                 div.style.pointerEvents = this._STRINGS.ST_NONE;
@@ -386,11 +378,9 @@ export default class DOMManager{
             if(!player.yourPieces[tokenImg.id].isMovementAllowed(x)){
                 checkTokens = false;
             }
-
             cont++;
 
         }
-
         return [cont, checkTokens]
     }
 
@@ -408,10 +398,8 @@ export default class DOMManager{
         
         let array = this._goOverLastBoxes(cont, checkTokens, player, tokenImg, throu, value);
 
-        console.log(array);
         cont = array[0]
         checkTokens = array[1]
-        console.log(cont);
         
         if(checkTokens==true){
 
@@ -449,13 +437,17 @@ export default class DOMManager{
         
         if (casilla.firstElementChild.name != tokenImg.name) {
 
+            let player;
+
             let tokenEnemy = casilla.firstElementChild;
             let colorToken = tokenEnemy.name;
+
+            this._switchColorToken(colorToken);
             
-            this._gameManager.setPosToken(tokenEnemy.id,this._gameManager.backHome(this._switchColorToken(colorToken)));
+            this._gameManager.setPosToken(tokenEnemy.id,this._gameManager.backHome(player));
             this._gameManager.getToken(tokenEnemy.id).isOutHome = false;
 
-            let res = this._gameManager.returnTrhows();
+            let res = this._gameManager.returnThrows();
 
             for (let r = this._NUMBERS.DOM_ZERO; r < res.length; r++) {
                 res[r] = this._NUMBERS.DOM_TEN;
@@ -671,20 +663,6 @@ export default class DOMManager{
         btnR.title = 'Botón de retorno';
     }
 
-    _createPodiumImages(divP){
-
-        for(let j = this._NUMBERS.DOM_ZERO; j < this._NUMBERS.DOM_NUM_PLAYERS - this._NUMBERS.DOM_ONE; j++){
-
-            let podiumPlayer = document.createElement('img')
-
-            this._setAttributesPodium(podiumPlayer,j);
-
-            divP.appendChild(podiumPlayer);
-            divP.appendChild(this._createSpan(j));
-        }
-
-    }
-
     _createPodium(){
 
         let divP = document.createElement('div');
@@ -695,7 +673,15 @@ export default class DOMManager{
 
         divP.appendChild(p);
 
-        this._createPodiumImages(divP)
+        for(let j = this._NUMBERS.DOM_ZERO; j < this._NUMBERS.DOM_NUM_PLAYERS - this._NUMBERS.DOM_ONE; j++){
+
+            let podiumPlayer = document.createElement('img')
+
+            this._setAttributesPodium(podiumPlayer,j);
+
+            divP.appendChild(podiumPlayer);
+            divP.appendChild(this._createSpan(j));
+        }
 
         this._divS.appendChild(divP);
     }
