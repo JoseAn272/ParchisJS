@@ -214,10 +214,13 @@ export default class DOMManager{
 
     _addVideo(video){
         let div = document.querySelector(`.${this._valuesColors[this._gameManager._turn]}`);
+        let div2 = document.querySelector(`.${this._valuesColors[this._gameManager._turn]}2`);
 
-        div.className = this._valuesColors[this._gameManager._turn] + '2';
-
-        div.appendChild(video);
+        if (div2 == null) {
+            div.className = this._valuesColors[this._gameManager._turn] + '2';
+            div2 = div;
+            div2.appendChild(video);
+        }
     }
 
     _setAttributesDadosFinishPlayer(){
@@ -318,7 +321,7 @@ export default class DOMManager{
                     break;
                 }
 
-                this._checkNextPositionAndMovement();
+                this._checkNextPositionAndMovement(player, tokenImg, checkTokens);
 
                 pos = this._gameManager.move_token(player, tokenImg.id);
 
@@ -335,7 +338,6 @@ export default class DOMManager{
         tokenImg.addEventListener('click', () => {this._updateScore();});
         
     }
-
 
     _moveTokenLastBoxesAllowed(player, tokenImg, cont){
         player.yourPieces[tokenImg.id].whatPosition = player.yourPieces[tokenImg.id].whatPosition + cont;
@@ -408,23 +410,21 @@ export default class DOMManager{
         } 
     }
 
-    _switchColorToken(colorToken){
-
-        let player;
+    _switchColorToken(colorToken, tokenEnemy){
 
         switch (colorToken) {
             case this._COLORS.DICE_RED:
                 document.querySelector(`.${this._COLORS.DICE_RED}`).appendChild(tokenEnemy);
-                return player = this._gameManager.getPlayerSelected(this._STRINGS.ST_RED);
+                return this._gameManager.getPlayerSelected(this._STRINGS.ST_RED);
             case this._COLORS.DICE_YELLOW:
                 document.querySelector(`.${this._COLORS.DICE_YELLOW}`).appendChild(tokenEnemy);
-                return player = this._gameManager.getPlayerSelected(this._STRINGS.ST_YELLOW);
+                return this._gameManager.getPlayerSelected(this._STRINGS.ST_YELLOW);
             case this._COLORS.DICE_GREEN:
                 document.querySelector(`.${this._COLORS.DICE_GREEN}`).appendChild(tokenEnemy);
-                return player = this._gameManager.getPlayerSelected(this._STRINGS.ST_GREEN);
+                return this._gameManager.getPlayerSelected(this._STRINGS.ST_GREEN);
             case this._COLORS.DICE_BLUE:
                 document.querySelector(`.${this._COLORS.DICE_BLUE}`).appendChild(tokenEnemy);
-                return player = this._gameManager.getPlayerSelected(this._STRINGS.ST_BLUE);
+                return this._gameManager.getPlayerSelected(this._STRINGS.ST_BLUE);
         }
 
     }
@@ -442,7 +442,7 @@ export default class DOMManager{
             let tokenEnemy = casilla.firstElementChild;
             let colorToken = tokenEnemy.name;
 
-            this._switchColorToken(colorToken);
+            player = this._switchColorToken(colorToken, tokenEnemy);
             
             this._gameManager.setPosToken(tokenEnemy.id,this._gameManager.backHome(player));
             this._gameManager.getToken(tokenEnemy.id).isOutHome = false;
@@ -570,7 +570,7 @@ export default class DOMManager{
 
                 let tokenImg = document.createElement('img');
 
-                this._checkIfsCreateToken(i, j, tokenImg, players)
+                this._checkIfsCreateToken(i, j, tokenImg, players);
 
                 let divHome = document.querySelector(`.${this._valuesColors[i]}`);
 

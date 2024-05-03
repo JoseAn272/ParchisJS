@@ -131,9 +131,11 @@ export default class Events{
         } else if(this.getToken(token).isOutHome){
 
             this.setPosToken(token,index);
-            
+
             return this.getPosToken(token);
         }
+
+        //return this.getPosToken(token);
     }
 
     move_token(player,token_id){
@@ -151,14 +153,12 @@ export default class Events{
 
         for (let d = this._NUMBERS.GM_ZERO; d < nums.length; d++) {
 
-            let pos =  this.checkIfOutHomeOrMove(posinit, sum, token_id, index, nums[d]);
+            let num = this.checkIfOutHomeOrMove(posinit, sum, token_id, index, nums[d]);
 
-            if(pos != undefined){
-                return pos;
+            if (num != undefined) {
+                return num;
             }
-
-        }        
-
+        }
     }
 
     _end_turn(player){
@@ -217,7 +217,7 @@ export default class Events{
 
         for (let t = this._NUMBERS.GM_ZERO; t < player.howMuchPieces; t++) {
 
-            if (this.getToken(t).isFinish) {
+            if (player.yourPieces[t].isFinish == true) {
                 tfin++;
             }
         }
@@ -234,9 +234,12 @@ export default class Events{
     _finish_check(player){
 
         if (this._allTokensEnd(player) && player.hasEnd) {
+console.log(player);
+
             if (!(this.pFinish.includes(player))) {
                 this.addPFinish(player);
             }
+
             return true;
         }
 
