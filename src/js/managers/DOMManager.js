@@ -289,8 +289,17 @@ export default class DOMManager{
 
             if (!eat) {
                 this._changeStyleTokens();
+
+                //Hacemos que se pueda pasar de turno, ya que estaba bloqueado
+                let div = document.querySelector('[title="Cubilete"]');
+
+                div.style.pointerEvents = 'all';
             }
         }
+    }
+
+    _checkFinishLine(player, tokenImg){
+        return player.givePositionEnd == player.yourPieces[tokenImg.id].whatPosition || player.yourPieces[tokenImg.id].isInEnd
     }
 
     _eventToken(tokenImg,player){
@@ -309,7 +318,7 @@ export default class DOMManager{
 
             for (let i = this._NUMBERS.DOM_ONE;  i <= this._gameManager.getSumResults(); i++) {
 
-                if(player.givePositionEnd == player.yourPieces[tokenImg.id].whatPosition || player.yourPieces[tokenImg.id].isInEnd){
+                if(this._checkFinishLine(player, tokenImg)){
                     
                     this._checkBoxLast(i, this._gameManager.getSumResults(), player, tokenImg);
 
@@ -533,6 +542,10 @@ export default class DOMManager{
             
         }
 
+        let div = document.querySelector('[title="Cubilete"]');
+        
+        div.style.pointerEvents = this._STRINGS.ST_NONE;
+
     }
 
     thereAreTwoPlayers(i){
@@ -558,6 +571,7 @@ export default class DOMManager{
         if (i == this._NUMBERS.DOM_ZERO) {
             tokenImg.style.pointerEvents = this._STRINGS.ST_ALL;
         }
+        return i
     }
 
     _createToken(){
@@ -570,7 +584,7 @@ export default class DOMManager{
 
                 let tokenImg = document.createElement('img');
 
-                this._checkPlayersAndSetAttributesBeforeCreate(players, i, j, tokenImg);
+                i = this._checkPlayersAndSetAttributesBeforeCreate(players, i, j, tokenImg);
 
                 let divHome = document.querySelector(`.${this._valuesColors[i]}`);
 
