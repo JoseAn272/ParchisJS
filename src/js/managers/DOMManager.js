@@ -236,6 +236,63 @@ export default class DOMManager{
         dado1.style.fontSize = this._STRINGS.ST_SIZE40;
     }
 
+    _checkIfCanMoveNextBox(player, tokenImg){
+        let j = player.yourPieces[tokenImg.id].whatPosition + this._NUMBERS.DOM_ONE;
+
+        if (j > this._NUMBERS.DOM_LAST_BOX) {
+            j -= this._NUMBERS.DOM_LAST_BOX;
+        }
+
+        //Casilla a la que llega
+        let x = document.querySelector(`.c${j}`).childElementCount;
+
+        if(!player.yourPieces[tokenImg.id].isMovementAllowed(x)){
+
+            return false;
+
+        }
+        return true;
+    }
+
+    _checkIfCanLeaveHome(player, tokenImg){
+        if(player.yourPieces[tokenImg.id].isMovementAllowed(document.querySelector(`.c${player.givePositionInit}`).childElementCount )){
+                        
+            document.querySelector(`.c${player.givePositionInit}`).appendChild(tokenImg);
+
+        }else{
+            
+            player.yourPieces[tokenImg.id].whatPosition = this._NUMBERS.DOM_ZERO;
+            player.yourPieces[tokenImg.id].isOutHome = false;
+            
+        }
+    }
+    
+    _checkIfResetToken(checkTokens, player, tokenImg, posOrigin){
+        if(checkTokens == false){
+
+            console.log("reseteo de ficha");
+
+            player.yourPieces[tokenImg.id].isInEnd = false;
+            player.yourPieces[tokenImg.id].whatPosition = posOrigin;
+            
+            document.querySelector(`.c${posOrigin}`).appendChild(tokenImg);
+
+        } else {
+            let eat = false;
+
+            if (document.querySelector(`.c${player.yourPieces[tokenImg.id].whatPosition}`).childElementCount == this._NUMBERS.DOM_TWO) {
+
+                let casilla = document.querySelector(`.c${player.yourPieces[tokenImg.id].whatPosition}`);
+                eat = this._eatToken(casilla,tokenImg);
+
+            }
+
+            if (!eat) {
+                this._changeStyleTokens();
+            }
+        }
+    }
+
     _eventToken(tokenImg,player){
 
         tokenImg.addEventListener('click', () => {
@@ -259,35 +316,15 @@ export default class DOMManager{
                     break;
                 }
 
-                let j = player.yourPieces[tokenImg.id].whatPosition + this._NUMBERS.DOM_ONE;
-
-                if (j > this._NUMBERS.DOM_LAST_BOX) {
-                    j -= this._NUMBERS.DOM_LAST_BOX;
-                }
-
-                //Casilla a la que llega
-                let x = document.querySelector(`.c${j}`).childElementCount;
-
-                if(!player.yourPieces[tokenImg.id].isMovementAllowed(x)){
-
-                    checkTokens = false;
-
+                if(checkTokens==true){
+                    checkTokens = this._checkIfCanMoveNextBox(player, tokenImg);
                 }
 
                 pos = this._gameManager.move_token(player, tokenImg.id);
 
                 if(pos == this._NUMBERS.DOM_GET_OUT_HOME){
 
-                    if(player.yourPieces[tokenImg.id].isMovementAllowed(document.querySelector(`.c${player.givePositionInit}`).childElementCount )){
-                        
-                        document.querySelector(`.c${player.givePositionInit}`).appendChild(tokenImg);
-
-                    }else{
-                        
-                        player.yourPieces[tokenImg.id].whatPosition = this._NUMBERS.DOM_ZERO;
-                        player.yourPieces[tokenImg.id].isOutHome = false;
-                        
-                    }
+                    this._checkIfCanLeaveHome(player, tokenImg);
                     break;
                 }
 
@@ -295,36 +332,13 @@ export default class DOMManager{
 
             }
             
-            if(checkTokens == false){
-
-                console.log("reseteo de ficha");
-
-                player.yourPieces[tokenImg.id].isInEnd = false;
-                player.yourPieces[tokenImg.id].whatPosition = posOrigin;
-                
-                document.querySelector(`.c${posOrigin}`).appendChild(tokenImg);
-
-            } else {
-                let eat = false;
-
-                if (document.querySelector(`.c${player.yourPieces[tokenImg.id].whatPosition}`).childElementCount == this._NUMBERS.DOM_TWO) {
-
-                    let casilla = document.querySelector(`.c${player.yourPieces[tokenImg.id].whatPosition}`);
-                    eat = this._eatToken(casilla,tokenImg);
-
-                }
-
-                if (!eat) {
-                    //this._changeStyleTokens();
-                }
-            }
+            this._checkIfResetToken(checkTokens, player, tokenImg, posOrigin);
           
         });
 
         tokenImg.addEventListener('click', () => {this._updateScore();});
         
     }
-
     _moveTokenLastBoxesAllowed(player, tokenImg, cont){
         player.yourPieces[tokenImg.id].whatPosition = player.yourPieces[tokenImg.id].whatPosition + cont;
     
@@ -531,6 +545,21 @@ export default class DOMManager{
         return players[0].howMuchPieces;
     }
 
+    _checkPlayersAndSetAttributesBeforeCreate(players, i, j, tokenImg){
+        if(this.thereAreTwoPlayers(i)){
+            i = this._NUMBERS.DOM_TWO;
+            this._eventToken(tokenImg,players[this._NUMBERS.DOM_ONE]);
+        }else{
+            this._eventToken(tokenImg,players[i]);
+        }
+
+        this._setAttributesTokenImg(tokenImg,j,i);
+
+        if (i == this._NUMBERS.DOM_ZERO) {
+            tokenImg.style.pointerEvents = this._STRINGS.ST_ALL;
+        }
+    }
+
     _createToken(){
 
         let players = this._gameManager._configC.givePlayers;
@@ -541,18 +570,7 @@ export default class DOMManager{
 
                 let tokenImg = document.createElement('img');
 
-                if(this.thereAreTwoPlayers(i)){
-                    i = this._NUMBERS.DOM_TWO;
-                    this._eventToken(tokenImg,players[this._NUMBERS.DOM_ONE]);
-                }else{
-                    this._eventToken(tokenImg,players[i]);
-                }
-
-                this._setAttributesTokenImg(tokenImg,j,i);
-
-                if (i == this._NUMBERS.DOM_ZERO) {
-                    tokenImg.style.pointerEvents = this._STRINGS.ST_ALL;
-                }
+                this._checkPlayersAndSetAttributesBeforeCreate(players, i, j, tokenImg);
 
                 let divHome = document.querySelector(`.${this._valuesColors[i]}`);
 
