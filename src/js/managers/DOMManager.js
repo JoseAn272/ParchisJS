@@ -266,6 +266,12 @@ export default class DOMManager{
             
         }
     }
+
+    _CubileteCanThrow(){
+        let div = document.querySelector('[title="Cubilete"]');
+
+        div.style.pointerEvents = 'all';
+    }
     
     _checkIfResetToken(checkTokens, player, tokenImg, posOrigin){
         if(checkTokens == false){
@@ -288,12 +294,10 @@ export default class DOMManager{
             }
 
             if (!eat) {
-                this._changeStyleTokens();
+                //this._changeStyleTokens();
 
                 //Hacemos que se pueda pasar de turno, ya que estaba bloqueado
-                let div = document.querySelector('[title="Cubilete"]');
-
-                div.style.pointerEvents = 'all';
+                //this._CubileteCanThrow();
             }
         }
     }
@@ -305,11 +309,9 @@ export default class DOMManager{
     _eventToken(tokenImg,player){
 
         tokenImg.addEventListener('click', () => {
-
             let players = this._gameManager._configC.givePlayers;
             let checkTokens = true;
             let pos = this._NUMBERS.DOM_ZERO;
-
             let posOrigin = player.yourPieces[tokenImg.id].whatPosition;
 
             if (player === undefined) {
@@ -530,6 +532,12 @@ export default class DOMManager{
         this._divD.appendChild(cube);
     }
 
+    _CubileteCantThrow(){
+        let div = document.querySelector('[title="Cubilete"]');
+        
+        div.style.pointerEvents = this._STRINGS.ST_NONE;
+    }
+
     _changeDices(){
 
         for (let d = 0; d < this._gameManager._configC.countDices(); d++) {
@@ -542,9 +550,7 @@ export default class DOMManager{
             
         }
 
-        let div = document.querySelector('[title="Cubilete"]');
-        
-        div.style.pointerEvents = this._STRINGS.ST_NONE;
+        //this._CubileteCantThrow();
 
     }
 

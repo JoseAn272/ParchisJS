@@ -11,6 +11,7 @@ export default class GameToken{
         this._outHome = false;
         this._inEnd = false;
         this._finish = false;
+        this._canMove = false;
     }
 
     get isInEnd(){
@@ -36,6 +37,19 @@ export default class GameToken{
     set isFinish(fin){
 
         this._finish = fin;
+        
+    }
+    
+    get canMove(){
+        return this._canMove;
+    }
+
+    /**
+     * @param {boolean} move
+     */
+    set canMove(move){
+
+        this._canMove = move;
         
     }
 
@@ -77,6 +91,12 @@ export default class GameToken{
 
 
     isMovementAllowed(casilla){
+
+        if (casilla < this._NUMBERS.GT_MAXTOKENINBOX) {
+            this.canMove = true;
+        }else{
+            this.canMove = false;
+        }
 
         return casilla < this._NUMBERS.GT_MAXTOKENINBOX;
     }

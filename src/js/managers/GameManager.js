@@ -134,8 +134,6 @@ export default class Events{
 
             return this.getPosToken(token);
         }
-
-        //return this.getPosToken(token);
     }
 
     move_token(player,token_id){
@@ -234,7 +232,6 @@ export default class Events{
     _finish_check(player){
 
         if (this._allTokensEnd(player) && player.hasEnd) {
-console.log(player);
 
             if (!(this.pFinish.includes(player))) {
                 this.addPFinish(player);
@@ -287,6 +284,22 @@ console.log(player);
         return this.countFinishP() == this._configC.countPlayers() - this._NUMBERS.GM_ONE;
     }
 
+    _seeChanceOfMoveToken(){
+        let player = this.getTurnPlayer();
+        let canMove = 0;
+
+        for (let index = 0; index < player.howMuchPieces; index++) {
+            if (player.yourPieces[index]._canMove && this.getPosToken(index) != player.givePositionInit) {
+                console.log('Se puede mover la ficha ' + index);
+                canMove++;
+            }else{
+                console.log('NO se puede mover la ficha ' + index);
+            }
+        }
+
+        return canMove;
+    }
+
     start(){
 
         if (!(this.isFinished()) || !(this.winnersFull())) {
@@ -297,12 +310,7 @@ console.log(player);
 
             this.getWinner();
 
-        }else{
-            alert('Fin de la partida');
-            return this._NUMBERS.GM_ZERO;
         }
-
-        return this._turn;
     }
 
 }
