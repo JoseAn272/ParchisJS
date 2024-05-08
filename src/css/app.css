@@ -461,7 +461,7 @@ h3{
     left:150px;
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-between;
     align-content: center;
     
 }
@@ -494,6 +494,7 @@ h3{
 .f7{
     top:149px;
     position:absolute ;
+    justify-content: space-around;
 
 }
 
@@ -503,7 +504,8 @@ h3{
     top: 300px;
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-between;
+    
     align-content: center;
     left:150px;
     width: 150px;
@@ -570,7 +572,7 @@ h3{
     top:150px;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: space-between;
     align-content: center;
 }
 .n1{
@@ -602,7 +604,7 @@ h3{
 .n7{
     left:149px;
     position:absolute ;
-
+    justify-content: space-around;
 }
 
 .row4{
@@ -613,7 +615,7 @@ h3{
     top: 150px;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: space-between;
     align-content: center;
 }
 .invisible2{

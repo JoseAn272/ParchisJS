@@ -181,6 +181,7 @@ export default class DOMManager{
         btnT.addEventListener('click', () => {
             this._changeDices();
             this._updateScore();
+            this._showModalForEndGame();
         });
 
         btnT.addEventListener('click',() => {
@@ -295,10 +296,11 @@ export default class DOMManager{
 
             if (!eat) {
                 //this._changeStyleTokens();
-
+                
                 //Hacemos que se pueda pasar de turno, ya que estaba bloqueado
                 //this._CubileteCanThrow();
             }
+            
         }
     }
 
@@ -735,6 +737,41 @@ export default class DOMManager{
             }
         }
         
+    }
+
+    _showModalForEndGame(){
+        if (this._gameManager.isFinished()) {
+            this._createModalFinish();
+        }
+    }
+
+    _createModalFinish(){
+        let div = document.querySelector(`.${this._CLASSES.UX_PODIUM}`);
+        let divP = div.cloneNode(true);
+
+        let modal = document.createElement("div");
+        modal.className = 'modal';
+
+        let divMes = document.createElement('div');
+        divMes.className = 'modal-content';
+
+        let message = document.createElement('h3');
+        message.textContent = 'FIN DE LA PARTIDA';
+
+        let btnR = document.querySelector(`.${this._CLASSES.UX_RETURN}`);
+        
+        divMes.appendChild(message);
+        modal.appendChild(divMes);
+        divMes.appendChild(divP);
+
+        divP.style.marginBottom = '30px';
+        divP.style.marginTop = '60px';
+
+        divMes.appendChild(btnR);
+
+        this._divC.appendChild(modal);
+
+        modal.style.display = "block";
     }
 
 }
