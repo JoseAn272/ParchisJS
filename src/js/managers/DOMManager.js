@@ -143,6 +143,7 @@ export default class DOMManager{
             this._gameManager._turn = this._NUMBERS.DOM_ZERO;
             this._gameManager.start();
             this._changeDices();
+            this._eventsCheckIfCanAdvance();
             this._gameManager._turn = this._NUMBERS.DOM_ZERO;
             this._podium = this._NUMBERS.DOM_ZERO;
 
@@ -181,6 +182,7 @@ export default class DOMManager{
         btnT.addEventListener('click', () => {
             this._changeDices();
             this._updateScore();
+            this._eventsCheckIfCanAdvance();
             this._showModalForEndGame();
         });
 
@@ -237,6 +239,97 @@ export default class DOMManager{
         dado1.style.fontSize = this._STRINGS.ST_SIZE40;
     }
 
+    _CubileteCantThrow(){
+        let div = document.querySelector('[title="Cubilete"]');
+        
+        div.style.pointerEvents = this._STRINGS.ST_NONE;
+    }
+
+    _CubileteCanThrow(){
+        let div = document.querySelector('[title="Cubilete"]');
+
+        div.style.pointerEvents = 'all';
+    }
+
+    _checkIfCanLeaveHomeEventAdvance(player, tokenImg){
+        if(player.yourPieces[tokenImg.id].isMovementAllowed(document.querySelector(`.c${player.givePositionInit}`).childElementCount )){
+                        
+            return true;
+
+        }else{
+            
+            return false;
+            
+        }
+    }
+
+    _checkRouteEventAdvance(player, tokenImg, checkTokens, pos){
+        for (let i = this._NUMBERS.DOM_ONE;  i <= this._gameManager.getSumResults(); i++) {
+
+            if(this._checkFinishLine(player, tokenImg)){
+                console.log("estoy aqui");
+
+                return true;
+            }
+
+            if(checkTokens==true){
+                checkTokens = this._checkIfCanMoveNextBox(player, tokenImg);
+            }else{
+                console.log("estoy aqui");
+
+                return false
+            }
+
+            let laterpost = player.yourPieces[tokenImg.id].whatPosition; 
+            let laterboolean = player.yourPieces[tokenImg.id].isOutHome;
+
+            pos = this._gameManager.move_token(player, tokenImg.id);
+
+            player.yourPieces[tokenImg.id].whatPosition = laterpost;
+            player.yourPieces[tokenImg.id].isOutHome = laterboolean;
+
+            if(pos == this._NUMBERS.DOM_GET_OUT_HOME){
+
+                if(this._checkIfCanLeaveHomeEventAdvance(player, tokenImg)){
+                    console.log("estoy aqui");
+                    return true;
+                }else{
+                    console.log("estoy aqui");
+
+                    return false
+                }
+            
+            }
+
+        }
+        if(player.yourPieces[tokenImg.id].isOutHome == true){
+            return true;
+        }
+        
+    }
+
+    _eventsCheckIfCanAdvance(){
+        
+        let player = this._gameManager.getTurnPlayer()
+        let checkTokens = true;
+        let pos = this._NUMBERS.DOM_ZERO;
+        let tokenImg = document.querySelectorAll(`[name="${this._valuesColors[this._gameManager._turn]}"]`);
+        let cont = 0;
+
+        for (let j = 0; j < player.yourPieces.length; j++) {
+            if(this._checkRouteEventAdvance(player, tokenImg[j], checkTokens, pos)){
+                cont++
+            }
+        }
+        console.log(cont);
+        if(cont!=0){
+            this._CubileteCantThrow()
+        }else{
+            this._CubileteCanThrow()
+        }
+        
+    }
+
     _checkIfCanMoveNextBox(player, tokenImg){
         let j = player.yourPieces[tokenImg.id].whatPosition + this._NUMBERS.DOM_ONE;
 
@@ -267,12 +360,6 @@ export default class DOMManager{
             
         }
     }
-
-    _CubileteCanThrow(){
-        let div = document.querySelector('[title="Cubilete"]');
-
-        div.style.pointerEvents = 'all';
-    }
     
     _checkIfResetToken(checkTokens, player, tokenImg, posOrigin){
         if(checkTokens == false){
@@ -296,9 +383,8 @@ export default class DOMManager{
 
             if (!eat) {
                 //this._changeStyleTokens();
-                
-                //Hacemos que se pueda pasar de turno, ya que estaba bloqueado
-                //this._CubileteCanThrow();
+                this._CubileteCanThrow()
+
             }
             
         }
@@ -306,6 +392,35 @@ export default class DOMManager{
 
     _checkFinishLine(player, tokenImg){
         return player.givePositionEnd == player.yourPieces[tokenImg.id].whatPosition || player.yourPieces[tokenImg.id].isInEnd
+    }
+
+    _checkRouteEventToken(player, tokenImg, checkTokens, pos, posOrigin){
+        for (let i = this._NUMBERS.DOM_ONE;  i <= this._gameManager.getSumResults(); i++) {
+
+            if(this._checkFinishLine(player, tokenImg)){
+                
+                this._checkBoxLast(i, this._gameManager.getSumResults(), player, tokenImg);
+
+                break;
+            }
+
+            if(checkTokens==true){
+                checkTokens = this._checkIfCanMoveNextBox(player, tokenImg);
+            }
+
+            pos = this._gameManager.move_token(player, tokenImg.id);
+
+            if(pos == this._NUMBERS.DOM_GET_OUT_HOME){
+
+                this._checkIfCanLeaveHome(player, tokenImg);
+                break;
+            }
+
+            document.querySelector(`.c${pos}`).appendChild(tokenImg);
+
+        }
+
+        this._checkIfResetToken(checkTokens, player, tokenImg, posOrigin);
     }
 
     _eventToken(tokenImg,player){
@@ -320,32 +435,7 @@ export default class DOMManager{
                 player = players[this._NUMBERS.DOM_ONE];
             }
 
-            for (let i = this._NUMBERS.DOM_ONE;  i <= this._gameManager.getSumResults(); i++) {
-
-                if(this._checkFinishLine(player, tokenImg)){
-                    
-                    this._checkBoxLast(i, this._gameManager.getSumResults(), player, tokenImg);
-
-                    break;
-                }
-
-                if(checkTokens==true){
-                    checkTokens = this._checkIfCanMoveNextBox(player, tokenImg);
-                }
-
-                pos = this._gameManager.move_token(player, tokenImg.id);
-
-                if(pos == this._NUMBERS.DOM_GET_OUT_HOME){
-
-                    this._checkIfCanLeaveHome(player, tokenImg);
-                    break;
-                }
-
-                document.querySelector(`.c${pos}`).appendChild(tokenImg);
-
-            }
-            
-            this._checkIfResetToken(checkTokens, player, tokenImg, posOrigin);
+            this._checkRouteEventToken(player, tokenImg, checkTokens, pos, posOrigin);
           
         });
 
@@ -534,11 +624,6 @@ export default class DOMManager{
         this._divD.appendChild(cube);
     }
 
-    _CubileteCantThrow(){
-        let div = document.querySelector('[title="Cubilete"]');
-        
-        div.style.pointerEvents = this._STRINGS.ST_NONE;
-    }
 
     _changeDices(){
 
@@ -551,8 +636,6 @@ export default class DOMManager{
             change.textContent = roll;
             
         }
-
-        //this._CubileteCantThrow();
 
     }
 
