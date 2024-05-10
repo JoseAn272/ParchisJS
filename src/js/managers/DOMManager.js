@@ -315,7 +315,14 @@ export default class DOMManager{
         let player = this._gameManager.getTurnPlayer();
         let checkTokens = true;
         let pos = this._NUMBERS.DOM_ZERO;
-        let tokenImg = document.querySelectorAll(`[name="${this._valuesColors[this._gameManager._turn]}"]`);
+
+        let turnos = [this._NUMBERS.DOM_ZERO,this._NUMBERS.DOM_TWO]; //[0,2]
+        let tokenImg;
+        if (this._NUMBERS.DOM_NUM_PLAYERS == 2) {
+            tokenImg = document.querySelectorAll(`[name="${this._valuesColors[turnos[this._gameManager._turn]]}"]`);            
+        }else{
+            tokenImg = document.querySelectorAll(`[name="${this._valuesColors[this._gameManager._turn]}"]`);
+        }
         let cont = 0;
 
         for (let j = 0; j < player.yourPieces.length; j++) {
