@@ -105,6 +105,8 @@ export default class DOMManager{
 
         this._podium = 0;
 
+        this._fakeTurn = 0;
+
         this._saves = ['casillas c12','casillas c17','casillas c29','casillas c34','casillas c46','casillas c51','casillas c63','casillas c68'];
 
         this._divC = document.querySelector(`.${this._CLASSES.UX_CONTENT}`);
@@ -131,6 +133,7 @@ export default class DOMManager{
 
     setUp_game(){
 
+
         this._createBtnReturn();
         this._createBtnThrow();
         this._createToken();
@@ -146,7 +149,6 @@ export default class DOMManager{
             this._eventsCheckIfCanAdvance();
             this._gameManager._turn = this._NUMBERS.DOM_ZERO;
             this._podium = this._NUMBERS.DOM_ZERO;
-
         })
     }
 
@@ -161,6 +163,7 @@ export default class DOMManager{
     }
 
     _eventBtnThrow(btnT){
+
         btnT.addEventListener('mouseover', () => {
 
             btnT.className = this._CLASSES.UX_IMGANIMATE;
@@ -174,12 +177,23 @@ export default class DOMManager{
         });
 
         btnT.addEventListener('click', () => {
-            this._gameManager.start();
-            this._changeImgTurn();
-            this._updateScore();
+                
+                this._gameManager.start();
+                this._changeImgTurn();
+                this._updateScore();
+                //this._changeStyleImgCant();
+                
         });
 
         btnT.addEventListener('click', () => {
+            setTimeout(() => {
+                //this._changeImgTurn(this._gameManager._turn+1);
+                this._changeStyleImg();
+            },10000);
+        })
+
+        btnT.addEventListener('click', () => {
+            
             this._changeDices();
             this._updateScore();
             this._eventsCheckIfCanAdvance();
@@ -192,12 +206,11 @@ export default class DOMManager{
 
            if (this._gameManager._finish_check(player)) {
                 
-                alert(`El jugador ${player.whatColor.toUpperCase()} ha terminado, por favor presione al cubilete para pasar el turno.`);
+                //alert(`El jugador ${player.whatColor.toUpperCase()} ha terminado, por favor presione al cubilete para pasar el turno.`);
 
                 this._setAttributesDadosFinishPlayer();
 
                 this._createVideo();
-                
             }
 
         });
@@ -239,18 +252,6 @@ export default class DOMManager{
         dado1.style.fontSize = this._STRINGS.ST_SIZE40;
     }
 
-    _CubileteCantThrow(){
-        let div = document.querySelector('[title="Cubilete"]');
-        
-        div.style.pointerEvents = this._STRINGS.ST_NONE;
-    }
-
-    _CubileteCanThrow(){
-        let div = document.querySelector('[title="Cubilete"]');
-
-        div.style.pointerEvents = 'all';
-    }
-
     _checkIfCanLeaveHomeEventAdvance(player, tokenImg){
         if(player.yourPieces[tokenImg.id].isMovementAllowed(document.querySelector(`.c${player.givePositionInit}`).childElementCount )){
                         
@@ -264,6 +265,7 @@ export default class DOMManager{
     }
 
     _checkRouteEventAdvance(player, tokenImg, checkTokens, pos){
+console.log(tokenImg);
         for (let i = this._NUMBERS.DOM_ONE;  i <= this._gameManager.getSumResults(); i++) {
 
             if(this._checkFinishLine(player, tokenImg)){
@@ -313,19 +315,22 @@ export default class DOMManager{
         let player = this._gameManager.getTurnPlayer()
         let checkTokens = true;
         let pos = this._NUMBERS.DOM_ZERO;
-        let tokenImg = document.querySelectorAll(`[name="${this._valuesColors[this._gameManager._turn]}"]`);
+
+        let turnos = [this._NUMBERS.DOM_ZERO,this._NUMBERS.DOM_TWO]; //[0,2]
+        let tokenImg = document.querySelectorAll(`[name="${this._valuesColors[turnos[this._gameManager._turn]]}"]`);
         let cont = 0;
 
         for (let j = 0; j < player.yourPieces.length; j++) {
+
             if(this._checkRouteEventAdvance(player, tokenImg[j], checkTokens, pos)){
                 cont++
             }
         }
         console.log(cont);
         if(cont!=0){
-            this._CubileteCantThrow()
+            this._changeStyleImgCant()
         }else{
-            this._CubileteCanThrow()
+            this._changeStyleImg()
         }
         
     }
@@ -383,7 +388,7 @@ export default class DOMManager{
 
             if (!eat) {
                 //this._changeStyleTokens();
-                this._CubileteCanThrow()
+                this._changeStyleImg()
 
             }
             
@@ -391,12 +396,13 @@ export default class DOMManager{
     }
 
     _checkFinishLine(player, tokenImg){
+//console.log(tokenImg);
         return player.givePositionEnd == player.yourPieces[tokenImg.id].whatPosition || player.yourPieces[tokenImg.id].isInEnd
     }
 
     _checkRouteEventToken(player, tokenImg, checkTokens, pos, posOrigin){
         for (let i = this._NUMBERS.DOM_ONE;  i <= this._gameManager.getSumResults(); i++) {
-
+console.log(tokenImg);
             if(this._checkFinishLine(player, tokenImg)){
                 
                 this._checkBoxLast(i, this._gameManager.getSumResults(), player, tokenImg);
@@ -410,6 +416,7 @@ export default class DOMManager{
 
             pos = this._gameManager.move_token(player, tokenImg.id);
 
+console.log(pos);
             if(pos == this._NUMBERS.DOM_GET_OUT_HOME){
 
                 this._checkIfCanLeaveHome(player, tokenImg);
@@ -439,7 +446,10 @@ export default class DOMManager{
           
         });
 
-        tokenImg.addEventListener('click', () => {this._updateScore();});
+        tokenImg.addEventListener('click', () => {
+            this._updateScore();
+            this._showModalForEndGame();
+        });
         
     }
     _moveTokenLastBoxesAllowed(player, tokenImg, cont){
@@ -547,10 +557,10 @@ export default class DOMManager{
 
             player = this._switchColorToken(colorToken, tokenEnemy);
             
-            this._gameManager.setPosToken(tokenEnemy.id,this._gameManager.backHome(player));
-            this._gameManager.getToken(tokenEnemy.id).isOutHome = false;
+            player.yourPieces[tokenEnemy.id].whatPosition = this._gameManager.backHome(player);
+            player.yourPieces[tokenEnemy.id].isOutHome = false;
 
-            let res = this._gameManager.returnThrows();
+            let res = this._gameManager._results;
 
             for (let r = this._NUMBERS.DOM_ZERO; r < res.length; r++) {
                 res[r] = this._NUMBERS.DOM_TEN;
@@ -574,6 +584,12 @@ export default class DOMManager{
 
     }
 
+    _changeStyleImg(){
+        let div = document.querySelector('[title="Cubilete"]');
+
+        div.style.pointerEvents = 'all';
+    }
+
     _changeStyleTokensValueColor(value){
 
         let divT = document.getElementsByName(`${this._valuesColors[value]}`)
@@ -583,6 +599,12 @@ export default class DOMManager{
             token.style.pointerEvents = 'all';
 
         });
+    }
+
+    _changeStyleImgCant(){
+        let div = document.querySelector('[title="Cubilete"]');
+
+        div.style.pointerEvents = 'none';
     }
 
     _createBtnThrow(){
@@ -624,7 +646,6 @@ export default class DOMManager{
         this._divD.appendChild(cube);
     }
 
-
     _changeDices(){
 
         for (let d = 0; d < this._gameManager._configC.countDices(); d++) {
@@ -637,6 +658,7 @@ export default class DOMManager{
             
         }
 
+        //this._changeStyleImgCant();
     }
 
     thereAreTwoPlayers(i){
@@ -644,12 +666,10 @@ export default class DOMManager{
     }
 
     _getNumPieces(){
-        let players = this._gameManager._configC.givePlayers;
-
-        return players[0].howMuchPieces;
+        return this._gameManager.getTurnPlayer().howMuchPieces;
     }
 
-    _checkPlayersAndSetAttributesBeforeCreate(players, i, j, tokenImg){
+    _checkIfsCreateToken(i, j, tokenImg, players){
         if(this.thereAreTwoPlayers(i)){
             i = this._NUMBERS.DOM_TWO;
             this._eventToken(tokenImg,players[this._NUMBERS.DOM_ONE]);
@@ -662,7 +682,8 @@ export default class DOMManager{
         if (i == this._NUMBERS.DOM_ZERO) {
             tokenImg.style.pointerEvents = this._STRINGS.ST_ALL;
         }
-        return i
+
+        return i;
     }
 
     _createToken(){
@@ -675,7 +696,7 @@ export default class DOMManager{
 
                 let tokenImg = document.createElement('img');
 
-                i = this._checkPlayersAndSetAttributesBeforeCreate(players, i, j, tokenImg);
+                i = this._checkIfsCreateToken(i, j, tokenImg, players);
 
                 let divHome = document.querySelector(`.${this._valuesColors[i]}`);
 
@@ -751,7 +772,7 @@ export default class DOMManager{
 
     _createBtnReturn(){
 
-        let divF = document.querySelector(`.${this._CLASSES.UX_FOOTER}`)
+        let divF = document.querySelector(`.${this._CLASSES.UX_FOOTER}`);
         let btnR = document.createElement('button');
 
         this._setAttributesBtnReturn(btnR);
@@ -774,7 +795,8 @@ export default class DOMManager{
         divP.className = this._CLASSES.UX_PODIUM;
 
         let p = document.createElement('p');
-        p.textContent = 'Marcador';
+        p.textContent = 'Podio';
+        p.style.textDecoration = 'underline';
 
         divP.appendChild(p);
 
@@ -823,12 +845,17 @@ export default class DOMManager{
     }
 
     _showModalForEndGame(){
+        this._updateScore();
+
         if (this._gameManager.isFinished()) {
+console.log(this._gameManager.isFinished());
             this._createModalFinish();
         }
     }
 
     _createModalFinish(){
+        this._updateScore();
+
         let div = document.querySelector(`.${this._CLASSES.UX_PODIUM}`);
         let divP = div.cloneNode(true);
 
@@ -847,8 +874,8 @@ export default class DOMManager{
         modal.appendChild(divMes);
         divMes.appendChild(divP);
 
-        divP.style.marginBottom = '30px';
-        divP.style.marginTop = '60px';
+        divP.style.marginBottom = '40px';
+        divP.style.marginTop = '20px';
 
         divMes.appendChild(btnR);
 
