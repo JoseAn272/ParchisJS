@@ -105,8 +105,6 @@ export default class DOMManager{
 
         this._podium = 0;
 
-        this._fakeTurn = 0;
-
         this._saves = ['casillas c12','casillas c17','casillas c29','casillas c34','casillas c46','casillas c51','casillas c63','casillas c68'];
 
         this._divC = document.querySelector(`.${this._CLASSES.UX_CONTENT}`);
@@ -133,7 +131,6 @@ export default class DOMManager{
 
     setUp_game(){
 
-
         this._createBtnReturn();
         this._createBtnThrow();
         this._createToken();
@@ -149,6 +146,7 @@ export default class DOMManager{
             this._eventsCheckIfCanAdvance();
             this._gameManager._turn = this._NUMBERS.DOM_ZERO;
             this._podium = this._NUMBERS.DOM_ZERO;
+
         })
     }
 
@@ -163,7 +161,6 @@ export default class DOMManager{
     }
 
     _eventBtnThrow(btnT){
-
         btnT.addEventListener('mouseover', () => {
 
             btnT.className = this._CLASSES.UX_IMGANIMATE;
@@ -177,23 +174,12 @@ export default class DOMManager{
         });
 
         btnT.addEventListener('click', () => {
-                
-                this._gameManager.start();
-                this._changeImgTurn();
-                this._updateScore();
-                //this._changeStyleImgCant();
-                
+            this._gameManager.start();
+            this._changeImgTurn();
+            this._updateScore();
         });
 
         btnT.addEventListener('click', () => {
-            setTimeout(() => {
-                //this._changeImgTurn(this._gameManager._turn+1);
-                this._changeStyleImg();
-            },10000);
-        })
-
-        btnT.addEventListener('click', () => {
-            
             this._changeDices();
             this._updateScore();
             this._eventsCheckIfCanAdvance();
@@ -206,11 +192,12 @@ export default class DOMManager{
 
            if (this._gameManager._finish_check(player)) {
                 
-                //alert(`El jugador ${player.whatColor.toUpperCase()} ha terminado, por favor presione al cubilete para pasar el turno.`);
+                alert(`El jugador ${player.whatColor.toUpperCase()} ha terminado, por favor presione al cubilete para pasar el turno.`);
 
                 this._setAttributesDadosFinishPlayer();
 
                 this._createVideo();
+                
             }
 
         });
@@ -252,6 +239,18 @@ export default class DOMManager{
         dado1.style.fontSize = this._STRINGS.ST_SIZE40;
     }
 
+    _CubileteCantThrow(){
+        let div = document.querySelector('[title="Cubilete"]');
+        
+        div.style.pointerEvents = this._STRINGS.ST_NONE;
+    }
+
+    _CubileteCanThrow(){
+        let div = document.querySelector('[title="Cubilete"]');
+
+        div.style.pointerEvents = 'all';
+    }
+
     _checkIfCanLeaveHomeEventAdvance(player, tokenImg){
         if(player.yourPieces[tokenImg.id].isMovementAllowed(document.querySelector(`.c${player.givePositionInit}`).childElementCount )){
                         
@@ -265,7 +264,6 @@ export default class DOMManager{
     }
 
     _checkRouteEventAdvance(player, tokenImg, checkTokens, pos){
-console.log(tokenImg);
         for (let i = this._NUMBERS.DOM_ONE;  i <= this._gameManager.getSumResults(); i++) {
 
             if(this._checkFinishLine(player, tokenImg)){
@@ -305,6 +303,8 @@ console.log(tokenImg);
 
         }
         if(player.yourPieces[tokenImg.id].isOutHome == true){
+            console.log("estoy aqui");
+
             return true;
         }
         
@@ -312,25 +312,22 @@ console.log(tokenImg);
 
     _eventsCheckIfCanAdvance(){
         
-        let player = this._gameManager.getTurnPlayer()
+        let player = this._gameManager.getTurnPlayer();
         let checkTokens = true;
         let pos = this._NUMBERS.DOM_ZERO;
-
-        let turnos = [this._NUMBERS.DOM_ZERO,this._NUMBERS.DOM_TWO]; //[0,2]
-        let tokenImg = document.querySelectorAll(`[name="${this._valuesColors[turnos[this._gameManager._turn]]}"]`);
+        let tokenImg = document.querySelectorAll(`[name="${this._valuesColors[this._gameManager._turn]}"]`);
         let cont = 0;
 
         for (let j = 0; j < player.yourPieces.length; j++) {
-
             if(this._checkRouteEventAdvance(player, tokenImg[j], checkTokens, pos)){
                 cont++
             }
         }
         console.log(cont);
         if(cont!=0){
-            this._changeStyleImgCant()
+            this._CubileteCantThrow()
         }else{
-            this._changeStyleImg()
+            this._CubileteCanThrow()
         }
         
     }
@@ -388,7 +385,7 @@ console.log(tokenImg);
 
             if (!eat) {
                 //this._changeStyleTokens();
-                this._changeStyleImg()
+                this._CubileteCanThrow()
 
             }
             
@@ -396,13 +393,12 @@ console.log(tokenImg);
     }
 
     _checkFinishLine(player, tokenImg){
-//console.log(tokenImg);
         return player.givePositionEnd == player.yourPieces[tokenImg.id].whatPosition || player.yourPieces[tokenImg.id].isInEnd
     }
 
     _checkRouteEventToken(player, tokenImg, checkTokens, pos, posOrigin){
         for (let i = this._NUMBERS.DOM_ONE;  i <= this._gameManager.getSumResults(); i++) {
-console.log(tokenImg);
+
             if(this._checkFinishLine(player, tokenImg)){
                 
                 this._checkBoxLast(i, this._gameManager.getSumResults(), player, tokenImg);
@@ -416,13 +412,12 @@ console.log(tokenImg);
 
             pos = this._gameManager.move_token(player, tokenImg.id);
 
-console.log(pos);
             if(pos == this._NUMBERS.DOM_GET_OUT_HOME){
 
                 this._checkIfCanLeaveHome(player, tokenImg);
                 break;
             }
-
+        
             document.querySelector(`.c${pos}`).appendChild(tokenImg);
 
         }
@@ -433,6 +428,7 @@ console.log(pos);
     _eventToken(tokenImg,player){
 
         tokenImg.addEventListener('click', () => {
+
             let players = this._gameManager._configC.givePlayers;
             let checkTokens = true;
             let pos = this._NUMBERS.DOM_ZERO;
@@ -446,10 +442,7 @@ console.log(pos);
           
         });
 
-        tokenImg.addEventListener('click', () => {
-            this._updateScore();
-            this._showModalForEndGame();
-        });
+        tokenImg.addEventListener('click', () => {this._updateScore();});
         
     }
     _moveTokenLastBoxesAllowed(player, tokenImg, cont){
@@ -557,7 +550,7 @@ console.log(pos);
 
             player = this._switchColorToken(colorToken, tokenEnemy);
             
-            player.yourPieces[tokenEnemy.id].whatPosition = this._gameManager.backHome(player);
+            player.yourPieces[tokenEnemy.id].whatPosition = this._gameManager.backHome(player)
             player.yourPieces[tokenEnemy.id].isOutHome = false;
 
             let res = this._gameManager._results;
@@ -565,6 +558,8 @@ console.log(pos);
             for (let r = this._NUMBERS.DOM_ZERO; r < res.length; r++) {
                 res[r] = this._NUMBERS.DOM_TEN;
             }
+
+            this._eventsCheckIfCanAdvance();
 
             return true;
         }
@@ -584,12 +579,6 @@ console.log(pos);
 
     }
 
-    _changeStyleImg(){
-        let div = document.querySelector('[title="Cubilete"]');
-
-        div.style.pointerEvents = 'all';
-    }
-
     _changeStyleTokensValueColor(value){
 
         let divT = document.getElementsByName(`${this._valuesColors[value]}`)
@@ -599,12 +588,6 @@ console.log(pos);
             token.style.pointerEvents = 'all';
 
         });
-    }
-
-    _changeStyleImgCant(){
-        let div = document.querySelector('[title="Cubilete"]');
-
-        div.style.pointerEvents = 'none';
     }
 
     _createBtnThrow(){
@@ -646,6 +629,7 @@ console.log(pos);
         this._divD.appendChild(cube);
     }
 
+
     _changeDices(){
 
         for (let d = 0; d < this._gameManager._configC.countDices(); d++) {
@@ -658,7 +642,6 @@ console.log(pos);
             
         }
 
-        //this._changeStyleImgCant();
     }
 
     thereAreTwoPlayers(i){
@@ -666,10 +649,12 @@ console.log(pos);
     }
 
     _getNumPieces(){
-        return this._gameManager.getTurnPlayer().howMuchPieces;
+        let players = this._gameManager._configC.givePlayers;
+
+        return players[0].howMuchPieces;
     }
 
-    _checkIfsCreateToken(i, j, tokenImg, players){
+    _checkPlayersAndSetAttributesBeforeCreate(players, i, j, tokenImg){
         if(this.thereAreTwoPlayers(i)){
             i = this._NUMBERS.DOM_TWO;
             this._eventToken(tokenImg,players[this._NUMBERS.DOM_ONE]);
@@ -682,8 +667,7 @@ console.log(pos);
         if (i == this._NUMBERS.DOM_ZERO) {
             tokenImg.style.pointerEvents = this._STRINGS.ST_ALL;
         }
-
-        return i;
+        return i
     }
 
     _createToken(){
@@ -696,7 +680,7 @@ console.log(pos);
 
                 let tokenImg = document.createElement('img');
 
-                i = this._checkIfsCreateToken(i, j, tokenImg, players);
+                i = this._checkPlayersAndSetAttributesBeforeCreate(players, i, j, tokenImg);
 
                 let divHome = document.querySelector(`.${this._valuesColors[i]}`);
 
@@ -772,7 +756,7 @@ console.log(pos);
 
     _createBtnReturn(){
 
-        let divF = document.querySelector(`.${this._CLASSES.UX_FOOTER}`);
+        let divF = document.querySelector(`.${this._CLASSES.UX_FOOTER}`)
         let btnR = document.createElement('button');
 
         this._setAttributesBtnReturn(btnR);
@@ -795,8 +779,7 @@ console.log(pos);
         divP.className = this._CLASSES.UX_PODIUM;
 
         let p = document.createElement('p');
-        p.textContent = 'Podio';
-        p.style.textDecoration = 'underline';
+        p.textContent = 'Marcador';
 
         divP.appendChild(p);
 
@@ -845,17 +828,12 @@ console.log(pos);
     }
 
     _showModalForEndGame(){
-        this._updateScore();
-
         if (this._gameManager.isFinished()) {
-console.log(this._gameManager.isFinished());
             this._createModalFinish();
         }
     }
 
     _createModalFinish(){
-        this._updateScore();
-
         let div = document.querySelector(`.${this._CLASSES.UX_PODIUM}`);
         let divP = div.cloneNode(true);
 
@@ -874,8 +852,8 @@ console.log(this._gameManager.isFinished());
         modal.appendChild(divMes);
         divMes.appendChild(divP);
 
-        divP.style.marginBottom = '40px';
-        divP.style.marginTop = '20px';
+        divP.style.marginBottom = '30px';
+        divP.style.marginTop = '60px';
 
         divMes.appendChild(btnR);
 
