@@ -176,7 +176,7 @@ export default class Events{
         this._results = [];
 
     }
-
+//cambiar return por get
     returnThrows(){
         return this._results;
     }

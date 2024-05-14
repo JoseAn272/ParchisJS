@@ -566,8 +566,6 @@ export default class DOMManager{
                 res[r] = this._NUMBERS.DOM_TEN;
             }
 
-            this._eventsCheckIfCanAdvance();
-
             return true;
         }
 
